@@ -65,7 +65,7 @@ class CommandTests(unittest.TestCase):
             result = executor.execute(self.request({"cwd": "/", "env": {"MANYHUB_TEST_SECRET": "injected"}}))
             self.assertEqual(result.status, "succeeded")
             self.assertIsNone(result.output["secret"])
-            self.assertEqual(result.output["cwd"], str(self.root))
+            self.assertEqual(Path(result.output["cwd"]).resolve(), self.root.resolve())
         finally:
             del os.environ["MANYHUB_TEST_SECRET"]
 
