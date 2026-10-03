@@ -1,0 +1,21 @@
+services:
+  hub:
+    build: .
+    image: many-hub:local
+    restart: unless-stopped
+    init: true
+    read_only: true
+    user: "10001:10001"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 1.0
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    volumes:
+      - hub-data:/data
+    # No network listener, host port, Docker socket or credentials are mounted.
+    network_mode: none
+volumes:
+  hub-data:

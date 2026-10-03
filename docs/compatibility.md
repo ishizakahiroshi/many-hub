@@ -12,12 +12,12 @@ Checked 2026-10-03 in a Linux cloud workspace: CPython 3.12.14, SQLite 3.53.1.
 | Generic fixed-command Executor | Linux local real-process verified | 13 tests including full CLI roundtrip; POSIX-only, not a sandbox |
 | dot/Dots, Grok, OpenClaw, Hermes | unverified | no product-specific assumptions in Core |
 | MANY-AI-CLI / Deskly | deferred | references/API-only integration design |
-| VPS Docker | planned | no deployment/build run yet |
+| VPS Docker candidate | source reviewed; CI build/smoke required | no production deployment; inspect exact commit container job |
 | Windows/macOS executables | unverified | future OS-specific bundles and CI needed |
 | Multi-user / multi-tenant service | unsupported | owner/profile fields are future isolation preparation |
 | Remote MCP / OAuth | unsupported | stdio design only |
 
-## P0 regression coverage
+## Regression coverage
 
 `python -m unittest discover -s tests -v`: 98 tests pass: 29 Core + 3 crash-process recovery + 14 CLI/MCP + 39 Slack + 13 fixed-command tests (install both optional extras; command tests skip on Windows).
 
@@ -31,7 +31,7 @@ secret-bearing exception suppression, output bounds, schema guard, consistent
 backup, immutable events, rollback, competing workers and concurrent creates.
 
 Not proven: real external side-effect deduplication, live Slack reconnect,
-production system shutdown/restart, non-Linux execution, remote authentication,
+production system shutdown/restart, native executable bundles, remote authentication,
 OS-level sandboxing or production readiness. Tests deliberately do not claim
 those properties.
 
@@ -51,3 +51,15 @@ P3 verifies fixed argv/path allowlists, clean environment, real CLI roundtrip,
 duplex/output limits, pre-spawn expiry, thread-start failure cleanup, process-group
 cleanup and invalid-result handling. It does not prove hostile process isolation
 or any external AI/provider capability.
+
+## P4/P5/P6 status
+
+P4 external AI/bot and P5 MANY-AI-CLI/Deskly integrations are documented verification
+gates only. Optional external_refs are supported, but no importer, source DB access
+or product-specific runtime integration is implemented.
+
+P6 preparation supplies a non-root read-only/no-network container, local persistent
+volume, CI build/mock-roundtrip/restart smoke, and backup/restore/update/rollback
+guidance. Local workspace has no Docker/Podman/nerdctl, so container execution
+requires the GitHub Linux CI job; inspect its exact-head result. This is not VPS,
+HTTPS, remote auth, team-operation or production deployment verification.

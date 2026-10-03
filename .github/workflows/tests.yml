@@ -34,3 +34,12 @@ jobs:
         run: python -m pip install '.[mcp,slack]'
       - name: Test official SDK adapters with local fixtures
         run: python -m unittest discover -s tests -v
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and smoke local container without publishing
+        run: bash tests/container_smoke.sh

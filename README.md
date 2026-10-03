@@ -6,7 +6,7 @@ MANY Hub routes work and results between interchangeable clients, transports and
 executors. It is an independent Apache-2.0 project. The authoritative product
 specification is [MANY_HUB_MASTER_PLAN.md](MANY_HUB_MASTER_PLAN.md).
 
-## Current milestone: P3 local fixed-command Executor
+## Current milestone: P0–P3 foundation; deployment preparation
 
 Implemented and locally tested: product-independent Service API, SQLite
 persistence, tasks/runs/events, durable inbox/outbox, Mock Executor, owned JSON
@@ -51,7 +51,9 @@ and a full CLI create → worker → result round-trip. Explicit trusted operato
 configuration is required; it is never enabled by task text. Run
 `python examples/command_roundtrip.py` for an effect-free real-process demo.
 See [the command contract](docs/adapters.md#generic-fixed-command-executor-p3).
-Container packaging is subsequent preparation. This is an early development snapshot, not a released production hub.
+A non-root, no-network Docker/Compose candidate and CI build/smoke job are
+included. See [deployment, backup, restore and rollback](docs/deployment.md).
+This is local/container preparation; no production VPS deployment occurred. This is an early development snapshot, not a released production hub.
 
 ## Design and boundaries
 
@@ -68,3 +70,14 @@ implied by the presence of an interface.
 
 GitHub is the canonical implementation history. No package registry publication,
 release, merge or production deployment is part of this milestone.
+
+## Remaining gates
+
+- Slack needs an explicitly authorized real workspace/identity round-trip
+- External AI/bot adapters and MANY-AI-CLI/Deskly integrations are unimplemented
+- Remote HTTP/MCP auth, OAuth, team operation and persistent secret provisioning are unimplemented
+- Native executable bundles, registry publication and releases have not occurred
+- Production deployment, public ingress and Cloudflare changes require separate approval
+
+See the [support matrix](docs/compatibility.md) for exact verified versus unverified
+scope. GitHub Actions results are evidence for their exact commit, not a release.

@@ -66,8 +66,9 @@ milestones. Schema version 1 is checked; newer schemas fail closed.
 - Core limits: request 32 KiB, result 64 KiB, 4-hop limit, 24-hour task expiry
   ceiling, 300-second run timeout ceiling, 100 active tasks and 60 accepted
   new-run requests (create/reply)/minute per principal/profile by default.
-- Only Mock is verified now. An Executor must enforce its own wall-clock and
-  output limits; Core validates results but cannot sandbox a blocking adapter.
+- Mock and the trusted fixed-command POSIX adapter have local execution tests.
+  Slack is offline-fixture tested; external AI/provider adapters remain unverified.
+  Each Executor must enforce its own limits; Core cannot sandbox a blocking adapter.
 - SQLite backup API produces a consistent database snapshot. Restore only while
   stopped. An old snapshot may contain queued work that executed after the backup;
   before starting workers, reconcile every nonterminal restored task with the

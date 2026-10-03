@@ -215,3 +215,47 @@ processes for create, worker and get, uses the trusted project JSON worker and
 checks the structured result. It also proves that creation is denied without the
 explicit command configuration/grant. This tests local real execution, not an
 external AI account or production service.
+
+## P4 external AI/bot verification gates
+
+No runtime integration with dot/Dots, Grok Bot, OpenClaw or Hermes is implemented
+or claimed. A name is not an endpoint, authenticated identity or verified
+capability. Keep their start/async/resume/cancel/question/approval/artifact flags
+false until the exact product, version, API/bot identity and permission boundary
+have been verified independently.
+
+For each future adapter, record a separate evidence row containing:
+
+1. Exact product/version and authorized endpoint or bot ID
+2. Authenticated principal mapping and scoped executor grant
+3. Start acknowledgment versus actual run success
+4. Stable request/run correlation and duplicate behavior
+5. Question/reply matching and executor-owned approval authority
+6. Cancel request versus confirmed stop, timeout and late results
+7. Structured result/artifacts and their allowed recipients
+8. Reconnect/crash recovery, uncertain effects, cost/output limits
+9. Secret isolation, tested environment, date and evidence link
+
+The real test must be Client → Hub → that specific Executor → Hub → same Client.
+Mock fixtures, a successful chat post or another product's behavior cannot mark
+a row live-supported. No OAuth, account linking, credential creation/entry or
+production message follows automatically from these planned gates.
+
+## P5 reference/import contract
+
+MANY-AI-CLI and Deskly integrations remain unimplemented and unverified. The only
+implemented primitive is an owned task's optional namespaced `external_refs`
+JSON, with persistence and backup/restore tests. It stores an explicit minimal
+reference; it does not read the original application or transfer ownership.
+
+A future importer must accept a user-selected reference and an explicitly
+published safe API, retain the original system as source of truth, and map only
+necessary IDs/result links. It must not copy either product's code, internal DB,
+authentication store, full logs, all sessions or contact history. No PTY input or
+blanket project completion is authorized. Each integration must be removable
+without modifying Core or changing the original product's normal behavior.
+
+Proof gates before claiming support: a selected item round-trip through its
+published interface, minimal-data inspection, revocation/disable test, and an
+independent check that the source product still works normally with the adapter
+off. No changes to either product repository are included here.

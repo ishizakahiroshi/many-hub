@@ -57,7 +57,9 @@ implemented. Keep the private data volume outside Git and distribute only source
 
 ## Deployment and dependencies
 
-No production configuration is included in the P0 milestone. Use only local
-effect-free testing. Public ingress, scopes, OAuth, credentials, registry publish,
+A non-root, no-network local Docker/Compose candidate is included. It defaults to
+Mock only; production readiness, remote authentication and secret provisioning
+are not established. Use effect-free fixtures until each real integration is
+explicitly authorized. Public ingress, scopes, OAuth, credentials, registry publish,
 production posts and deployment require separate authorization. Apache-2.0 covers
 original project code. No source from MANY-AI-CLI or Deskly is imported.
