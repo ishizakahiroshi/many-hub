@@ -63,3 +63,7 @@ are not established. Use effect-free fixtures until each real integration is
 explicitly authorized. Public ingress, scopes, OAuth, credentials, registry publish,
 production posts and deployment require separate authorization. Apache-2.0 covers
 original project code. No source from MANY-AI-CLI or Deskly is imported.
+
+SQLite runtime safety follows ADR-0005: only known fixed runtimes use WAL, older
+or unknown-backport runtimes use DELETE/EXTRA with checked mode selection. This
+is a durability mitigation, not an assertion that storage hardware cannot fail.

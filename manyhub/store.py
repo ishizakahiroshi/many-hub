@@ -70,6 +70,19 @@ class Store(Protocol):
     def transaction(self) -> contextlib.AbstractContextManager[sqlite3.Connection]: ...
 
 
+def wal_reset_fixed(version: tuple[int, int, int]) -> bool:
+    """Known upstream fixes for the 2026 WAL-reset race (sqlite.org/wal.html).
+
+    Unknown distribution backports conservatively use rollback journaling.
+    Compare integer tuples: e.g. 3.9 must never sort above 3.51 as a string.
+    """
+    if len(version) != 3 or any(type(part) is not int or part < 0 for part in version):
+        return False
+    return (version >= (3, 51, 3)
+            or (version[:2] == (3, 50) and version[2] >= 7)
+            or (version[:2] == (3, 44) and version[2] >= 6))
+
+
 class SQLiteStore:
     """One connection guarded in process; BEGIN IMMEDIATE coordinates processes.
 
@@ -89,20 +102,34 @@ class SQLiteStore:
                 os.close(fd)
         self._lock = threading.RLock()
         self._db = sqlite3.connect(self.path, autocommit=True, check_same_thread=False, timeout=5)
-        self._db.row_factory = sqlite3.Row
-        self._db.execute("PRAGMA foreign_keys=ON")
-        self._db.execute("PRAGMA journal_mode=WAL")
-        self._db.execute("PRAGMA synchronous=FULL")
-        self._db.execute("PRAGMA busy_timeout=5000")
-        # The schema is atomic, and a newer schema is never silently downgraded.
-        version = self._db.execute("PRAGMA user_version").fetchone()[0]
-        if version not in (0, 1):
+        try:
+            self._db.row_factory = sqlite3.Row
+            # Reject unknown schemas before changing persistent journal mode.
+            version = self._db.execute("PRAGMA user_version").fetchone()[0]
+            if version not in (0, 1):
+                raise ValueError("Unsupported database schema version")
+            self._db.execute("PRAGMA foreign_keys=ON")
+            self._db.execute("PRAGMA busy_timeout=5000")
+            mode = "WAL" if wal_reset_fixed(sqlite3.sqlite_version_info) else "DELETE"
+            self.journal_mode = self._db.execute(f"PRAGMA journal_mode={mode}").fetchone()[0].lower()
+            allowed = {"wal", "delete"} if mode == "WAL" else {"delete"}
+            if self.path == ":memory:":
+                allowed.add("memory")
+            if self.journal_mode not in allowed:
+                raise ValueError("Could not select a safe SQLite journal mode")
+            # DELETE needs directory synchronization after journal removal.
+            self._db.execute("PRAGMA synchronous=EXTRA" if self.journal_mode == "delete" else "PRAGMA synchronous=FULL")
+            expected_sync = 3 if self.journal_mode == "delete" else 2
+            if self._db.execute("PRAGMA synchronous").fetchone()[0] != expected_sync:
+                raise ValueError("Could not select safe SQLite synchronization")
+            # The schema and version update commit atomically.
+            self._db.executescript("BEGIN IMMEDIATE;" + SCHEMA + "PRAGMA user_version=1;COMMIT;")
+            with self.transaction() as db:
+                db.execute("INSERT OR IGNORE INTO meta VALUES('hub_instance_id',?)", (str(uuid.uuid4()),))
+                self.hub_instance_id = db.execute("SELECT value FROM meta WHERE key='hub_instance_id'").fetchone()[0]
+        except BaseException:
             self._db.close()
-            raise ValueError("Unsupported database schema version")
-        self._db.executescript("BEGIN IMMEDIATE;" + SCHEMA + "PRAGMA user_version=1;COMMIT;")
-        with self.transaction() as db:
-            db.execute("INSERT OR IGNORE INTO meta VALUES('hub_instance_id',?)", (str(uuid.uuid4()),))
-            self.hub_instance_id = db.execute("SELECT value FROM meta WHERE key='hub_instance_id'").fetchone()[0]
+            raise
 
     @contextlib.contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:

@@ -88,3 +88,12 @@ the exact commit's run before calling that platform verified.
 HTTPS, scoped remote auth, secret provisioning, automated restore/reconciliation,
 remote MCP OAuth and multi-user operation remain unimplemented. Cloudflare is
 optional future ingress, not a Core dependency.
+
+## SQLite runtime safety
+
+The linked SQLite version, not just Python's version, controls journal selection.
+Known upstream WAL-reset fixes use WAL/FULL; other versions use DELETE/EXTRA.
+The fallback trades concurrency and synchronization cost for avoiding the known
+WAL race. Stop all processes before changing runtimes/modes, and never mix SQLite
+versions against a live database. See [ADR-0005](decisions/ADR-0005-sqlite-runtime-safety.md).
+This does not waive consistent-backup or old-snapshot reconciliation requirements.

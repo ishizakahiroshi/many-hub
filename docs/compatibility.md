@@ -19,7 +19,7 @@ Checked 2026-10-03 in a Linux cloud workspace: CPython 3.12.14, SQLite 3.53.1.
 
 ## Regression coverage
 
-`python -m unittest discover -s tests -v`: 98 tests pass: 29 Core + 3 crash-process recovery + 14 CLI/MCP + 39 Slack + 13 fixed-command tests (install both optional extras; command tests skip on Windows).
+`python -m unittest discover -s tests -v`: 106 tests pass: 29 Core + 3 crash-process recovery + 14 CLI/MCP + 39 Slack + 13 fixed-command + 8 SQLite runtime-safety tests (install both optional extras; command tests skip on Windows).
 
 Coverage includes mock result + independent delivery, idempotent replay and ID
 conflicts, duplicate callbacks, expired input, result deadlines, queued and
@@ -63,3 +63,8 @@ volume, CI build/mock-roundtrip/restart smoke, and backup/restore/update/rollbac
 guidance. Local workspace has no Docker/Podman/nerdctl, so container execution
 requires the GitHub Linux CI job; inspect its exact-head result. This is not VPS,
 HTTPS, remote auth, team-operation or production deployment verification.
+
+P6 candidate commit `d4ce10855216b8d17db1fcdd28c9caec9f11a000` passed all eight CI
+jobs, including an actual confined Docker build/CLI/default-worker/restart smoke:
+https://github.com/ishizakahiroshi/many-hub/actions/runs/37091613220 .
+The subsequent SQLite runtime-safety correction must pass its own exact-head CI.

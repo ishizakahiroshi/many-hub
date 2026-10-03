@@ -33,3 +33,6 @@ replies do not authorize effects. All unsupported capabilities default false.
 Sources: https://sqlite.org/atomiccommit.html ; https://sqlite.org/wal.html ;
 https://docs.python.org/3.12/library/sqlite3.html . SQLite WAL requires a local
 filesystem, not an NFS/multi-node volume. Backup uses SQLite's backup API.
+
+Runtime safety refinement: [ADR-0005](ADR-0005-sqlite-runtime-safety.md) selects
+WAL/FULL only on known fixed SQLite versions and DELETE/EXTRA otherwise.

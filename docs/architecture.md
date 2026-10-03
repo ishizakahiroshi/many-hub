@@ -19,8 +19,9 @@ multi-node deployment. Runtime SDKs are optional dependencies outside Core.
 
 Task creation atomically records its owner, request fingerprint, optional inbox
 receipt, first run, creation event, external references and execution outbox.
-SQLite WAL, FULL synchronous mode and explicit transactions provide local
-transaction durability subject to the host filesystem's guarantees. The Store
+SQLite uses WAL/FULL on known fixed runtimes, otherwise DELETE/EXTRA rollback
+journaling (ADR-0005). Explicit transactions provide local transaction durability
+subject to the host filesystem's guarantees. The Store
 protocol separates persistence from service operations; it currently exposes a
 transactional SQL connection. PostgreSQL is a future implementation, not drop-in
 verified compatibility.
