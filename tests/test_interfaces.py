@@ -25,11 +25,9 @@ HAS_MCP = importlib.util.find_spec("mcp") is not None
 class InterfaceFixture(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.database = self.root / "hub.sqlite3"
-
-    def tearDown(self):
-        self.temp.cleanup()
 
     def cli(self, *arguments, success=True):
         result = subprocess.run([sys.executable, "-m", "manyhub", "--database", str(self.database),

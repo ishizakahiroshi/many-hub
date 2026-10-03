@@ -250,11 +250,14 @@ class Service:
     def task_reply(self, context: Context, task_id: str, request: dict[str, Any]) -> dict[str, Any]:
         context.require("task:reply")
         bounded_json(request)
-        if set(request) - {"request_id", "input"}:
+        if set(request) - {"request_id", "input", "expected_run_id"}:
             raise HubError("invalid_request", "Unknown reply fields")
         request_id = identifier(request.get("request_id"), "request_id")
         payload = bounded_json(request.get("input", {}))
         content_hash = digest(request)
+        expected_run_id = request.get("expected_run_id")
+        if expected_run_id is not None:
+            identifier(expected_run_id, "expected_run_id")
         with self.store.transaction() as db:
             task = self._owned(db, context, task_id)
             context.require(f"executor:use:{task['executor_id']}")
@@ -263,6 +266,8 @@ class Service:
                 if prior[0] != content_hash:
                     raise HubError("conflict", "Reply request ID reused with different content")
                 return self._ack(db, context, task)
+            if expected_run_id is not None and expected_run_id != task["run_id"]:
+                raise HubError("conflict", "Reply belongs to a different run")
             if task["state"] == "awaiting_approval":
                 raise HubError("unsupported", "Text replies cannot resolve executor approval")
             if task["state"] != "awaiting_input":

@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install optional official MCP adapter
-        run: python -m pip install '.[mcp]'
-      - name: Test real stdio client and server
+      - name: Install optional official SDK adapters
+        run: python -m pip install '.[mcp,slack]'
+      - name: Test official SDK adapters with local fixtures
         run: python -m unittest discover -s tests -v

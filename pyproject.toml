@@ -14,6 +14,7 @@ dependencies = []
 
 [project.optional-dependencies]
 mcp = ["mcp==1.29.0"]
+slack = ["slack-bolt==1.30.0", "slack-sdk==3.45.0"]
 
 [project.scripts]
 manyhub = "manyhub.cli:main"

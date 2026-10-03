@@ -1,0 +1,18 @@
+{
+  "note": "Illustrative operator configuration; no loader or live connection is implied. IDs are placeholders; never put tokens here.",
+  "team_id": "TEXAMPLE",
+  "app_id": "AEXAMPLE",
+  "bot_user_id": "UBOTEXAMPLE",
+  "channel_ids": ["CEXAMPLE"],
+  "client_id": "slack",
+  "transport_id": "slack-workspace-example",
+  "executor_id": "mock",
+  "command_prefix": "!many ",
+  "bindings": {
+    "UOWNEREXAMPLE": {
+      "principal_id": "owner",
+      "profile_id": "local",
+      "scopes": ["task:create", "task:read", "task:reply", "executor:use:mock", "client:use:slack", "transport:use:slack-workspace-example"]
+    }
+  }
+}

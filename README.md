@@ -6,7 +6,7 @@ MANY Hub routes work and results between interchangeable clients, transports and
 executors. It is an independent Apache-2.0 project. The authoritative product
 specification is [MANY_HUB_MASTER_PLAN.md](MANY_HUB_MASTER_PLAN.md).
 
-## Current milestone: P1 local CLI and MCP
+## Current milestone: P2 Slack adapter (offline verified)
 
 Implemented and locally tested: product-independent Service API, SQLite
 persistence, tasks/runs/events, durable inbox/outbox, Mock Executor, owned JSON
@@ -43,8 +43,11 @@ A create request is JSON such as `{"request_id":"example-1","input":{"text":"hel
 For MCP, install the optional extra (`pip install '.[mcp]'`) then run
 `manyhub mcp --stdio`. MCP queues tasks; a separate local worker processes them.
 See [Protocol](docs/protocol.md). No network listener or remote credential is
-created. Slack (P2), real fixed-command execution (P3) and container packaging
-remain subsequent milestones. This is an early development snapshot, not a released production hub.
+created. The Slack library adapter is offline verified using fake events/API and the
+actual official SDK with networking blocked. It is not connected to a workspace
+and has made no live posts. See [Adapter contracts](docs/adapters.md). Its durable
+thread mapping, sender grants and run-bound replies remain outside Core. Real
+fixed-command execution (P3) and container packaging are subsequent milestones. This is an early development snapshot, not a released production hub.
 
 ## Design and boundaries
 

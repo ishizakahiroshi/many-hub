@@ -208,3 +208,10 @@ invalid-input checks, and ping. No ChatGPT/Claude product integration, remote
 MCP, OAuth setup, or live external service use is claimed by that test.
 
 SDK reference: https://github.com/modelcontextprotocol/python-sdk/tree/v1.29.0
+
+## Run-bound replies
+
+A task.reply request may include expected_run_id. Core checks it atomically after
+idempotency replay lookup, before state transition. A stale non-replay reply
+conflicts rather than answering a different run. Slack requires this fence plus
+a message timestamp after the current run's confirmed question post.

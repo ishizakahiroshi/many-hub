@@ -327,6 +327,17 @@ class CoreTests(unittest.TestCase):
         self.hub.task_cancel(self.ctx, task["task_id"])
         self.assertEqual(self.hub.claim_delivery("local")["payload"]["state"], "cancelled")
 
+    def test_reply_can_be_bound_to_expected_run(self):
+        task = self.create(input={"mode": "question"})
+        self.hub.run_once()
+        self.assert_code("conflict", self.hub.task_reply, self.ctx, task["task_id"],
+                         {"request_id": "stale", "expected_run_id": "wrong", "input": {}})
+        request = {"request_id": "reply", "expected_run_id": task["run_id"], "input": {"answer": "42"}}
+        next_run = self.hub.task_reply(self.ctx, task["task_id"], request)
+        self.assertEqual(self.hub.task_reply(self.ctx, task["task_id"], request)["run_id"], next_run["run_id"])
+        self.assert_code("conflict", self.hub.task_reply, self.ctx, task["task_id"],
+                         {"request_id": "other-reply", "expected_run_id": task["run_id"], "input": {}})
+
     def test_two_worker_connections_only_one_claim(self):
         self.create()
         other_store = SQLiteStore(self.path)
