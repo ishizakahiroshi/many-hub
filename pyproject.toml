@@ -8,8 +8,15 @@ version = "0.1.0.dev0"
 description = "Many tools. Many agents. One hub."
 requires-python = ">=3.12"
 license = "Apache-2.0"
+license-files = ["LICENSE"]
 readme = "README.md"
 dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp==1.29.0"]
+
+[project.scripts]
+manyhub = "manyhub.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["manyhub*"]

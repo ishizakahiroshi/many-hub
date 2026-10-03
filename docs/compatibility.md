@@ -7,7 +7,7 @@ Checked 2026-10-03 in a Linux cloud workspace: CPython 3.12.14, SQLite 3.53.1.
 | Core Service API | verified locally | stdlib unittest suite |
 | SQLite/inbox/outbox/events | verified locally | atomicity, duplicate/concurrency, reopen and backup tests |
 | Mock Client → Mock Executor → Result | verified locally | tests and examples/mock_roundtrip.py |
-| CLI / MCP | P1 pending | SDK 1.29.0 available, not yet a supported adapter |
+| CLI / MCP stdio | verified locally | 14 interface tests, official SDK 1.29.0 client/server; no remote MCP |
 | Slack | P2 pending | no scopes, credentials or live posting performed |
 | Generic fixed-command Executor | P3 pending | safety design in ADR-0004 |
 | dot/Dots, Grok, OpenClaw, Hermes | unverified | no product-specific assumptions in Core |
@@ -19,7 +19,7 @@ Checked 2026-10-03 in a Linux cloud workspace: CPython 3.12.14, SQLite 3.53.1.
 
 ## P0 regression coverage
 
-`python -m unittest discover -s tests -v`: 28 Core tests + 3 actual crash-process recovery tests pass (31 P0 tests; P1 is a separate milestone).
+`python -m unittest discover -s tests -v`: 45 tests pass: 28 Core + 3 actual crash-process recovery + 14 CLI/MCP interface tests.
 
 Coverage includes mock result + independent delivery, idempotent replay and ID
 conflicts, duplicate callbacks, expired input, result deadlines, queued and
@@ -34,3 +34,6 @@ Not proven: real external side-effect deduplication, live Slack reconnect,
 production system shutdown/restart, non-Linux execution, remote authentication,
 OS-level sandboxing or production readiness. Tests deliberately do not claim
 those properties.
+
+P1 additionally verifies real stdio initialize/list/call/ping, owned question/reply/cancel,
+strict arguments, malformed-frame sanitization, and Core/CLI without MCP imports.

@@ -6,7 +6,7 @@ MANY Hub routes work and results between interchangeable clients, transports and
 executors. It is an independent Apache-2.0 project. The authoritative product
 specification is [MANY_HUB_MASTER_PLAN.md](MANY_HUB_MASTER_PLAN.md).
 
-## Current milestone: P0 Core
+## Current milestone: P1 local CLI and MCP
 
 Implemented and locally tested: product-independent Service API, SQLite
 persistence, tasks/runs/events, durable inbox/outbox, Mock Executor, owned JSON
@@ -29,9 +29,22 @@ The example uses a temporary database. It creates one task, runs Mock Executor,
 reads the structured result and acknowledges a mock delivery. No service
 credentials, network access, other product, or AI account is needed.
 
-CLI/MCP (P1), Slack (P2), a real fixed-command executor (P3), and container
-packaging (P6 preparation) are subsequent milestones, not current verified
-features. This is an early development snapshot, not a released production hub.
+CLI and official MCP stdio are implemented and locally tested. Examples:
+
+```sh
+python -m manyhub capabilities --json
+python -m manyhub task create --input-file request.json --json
+python -m manyhub worker --once --json
+python -m manyhub task list --json
+python -m manyhub serve --local
+```
+
+A create request is JSON such as `{"request_id":"example-1","input":{"text":"hello"}}`.
+For MCP, install the optional extra (`pip install '.[mcp]'`) then run
+`manyhub mcp --stdio`. MCP queues tasks; a separate local worker processes them.
+See [Protocol](docs/protocol.md). No network listener or remote credential is
+created. Slack (P2), real fixed-command execution (P3) and container packaging
+remain subsequent milestones. This is an early development snapshot, not a released production hub.
 
 ## Design and boundaries
 

@@ -1,3 +1,4 @@
+import contextlib
 import dataclasses
 import json
 import sqlite3
@@ -226,7 +227,7 @@ class CoreTests(unittest.TestCase):
             restored.close()
         with self.assertRaises(FileExistsError):
             self.store.backup(backup_path)
-        with sqlite3.connect(backup_path) as db:
+        with contextlib.closing(sqlite3.connect(backup_path)) as db:
             db.execute("PRAGMA user_version=99")
         with self.assertRaises(ValueError):
             SQLiteStore(backup_path)
