@@ -215,3 +215,11 @@ A task.reply request may include expected_run_id. Core checks it atomically afte
 idempotency replay lookup, before state transition. A stale non-replay reply
 conflicts rather than answering a different run. Slack requires this fence plus
 a message timestamp after the current run's confirmed question post.
+
+## Explicit local command configuration
+
+CLI/MCP/worker processes can opt into a trusted fixed-command Executor using
+--command-config /absolute/path/command.json. This path is an operator process
+argument, never a tool or task argument. The file fixes executable, argv, working
+directory and allowlist; no Hub environment is inherited. See adapters.md for
+the POSIX-only trust contract. Without the flag, only Mock is registered.

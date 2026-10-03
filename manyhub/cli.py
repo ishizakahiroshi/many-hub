@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 import math
 import sys
@@ -27,6 +28,8 @@ def _options(parser: argparse.ArgumentParser, *, root: bool = False) -> None:
     default = None if root else argparse.SUPPRESS
     parser.add_argument("--database", type=Path, default=default,
                         help="Local SQLite database (default: data/manyhub.sqlite3)")
+    parser.add_argument("--command-config", type=Path, default=default,
+                        help="Trusted local fixed-command Executor config (never task input)")
     parser.add_argument("--json", action="store_true", default=False if root else argparse.SUPPRESS,
                         help="Emit machine-readable JSON (errors go to stderr)")
 
@@ -114,8 +117,8 @@ def _emit(value: Any, *, compact: bool, error: bool = False) -> None:
           file=sys.stderr if error else sys.stdout)
 
 
-def _dispatch(args: argparse.Namespace, service: Service, config: Config) -> Any:
-    context = local_context(config)
+def _dispatch(args: argparse.Namespace, service: Service, config: Config, context=None) -> Any:
+    context = context or local_context(config)
     if args.command == "capabilities":
         return service.capabilities(context)
     if args.command == "executor":
@@ -151,9 +154,31 @@ def main(argv: list[str] | None = None) -> int:
     try:
         config = Config(database=args.database or Config().database)
         store = SQLiteStore(config.database)
-        service = Service(store, [MockExecutor()], max_pending=config.max_pending_tasks,
+        executors = [MockExecutor()]
+        context = local_context(config)
+        if args.command_config is not None:
+            # This is explicit operator configuration, never a task/MCP argument.
+            from .executors.command import CommandExecutor, CommandSpec
+            definition = read_request(args.command_config)
+            allowed = {"executor_id", "executable", "arguments", "workspace", "allowed_executables", "timeout_seconds", "max_output_bytes"}
+            required = {"executor_id", "executable", "arguments", "workspace", "allowed_executables"}
+            if set(definition) - allowed or not required <= set(definition):
+                raise HubError("invalid_request", "Invalid command configuration")
+            if (not isinstance(definition["executable"], str) or not isinstance(definition["workspace"], str)
+                    or not isinstance(definition["arguments"], list) or not isinstance(definition["allowed_executables"], list)
+                    or any(not isinstance(value, str) for value in definition["allowed_executables"])):
+                raise HubError("invalid_request", "Invalid command configuration")
+            executor = CommandExecutor(CommandSpec(
+                executor_id=definition["executor_id"], executable=Path(definition["executable"]),
+                arguments=tuple(definition["arguments"]), workspace=Path(definition["workspace"]),
+                allowed_executables=tuple(Path(value) for value in definition["allowed_executables"]),
+                timeout_seconds=definition.get("timeout_seconds", 10),
+                max_output_bytes=definition.get("max_output_bytes", 65536)))
+            executors.append(executor)
+            context = dataclasses.replace(context, scopes=context.scopes | {f"executor:use:{executor.executor_id}"})
+        service = Service(store, executors, max_pending=config.max_pending_tasks,
                           max_requests_per_minute=config.max_requests_per_minute)
-        result = _dispatch(args, service, config)
+        result = _dispatch(args, service, config, context)
         if result is not None:
             _emit(result, compact=args.json)
         return 0

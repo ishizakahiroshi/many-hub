@@ -6,7 +6,7 @@ MANY Hub routes work and results between interchangeable clients, transports and
 executors. It is an independent Apache-2.0 project. The authoritative product
 specification is [MANY_HUB_MASTER_PLAN.md](MANY_HUB_MASTER_PLAN.md).
 
-## Current milestone: P2 Slack adapter (offline verified)
+## Current milestone: P3 local fixed-command Executor
 
 Implemented and locally tested: product-independent Service API, SQLite
 persistence, tasks/runs/events, durable inbox/outbox, Mock Executor, owned JSON
@@ -46,8 +46,12 @@ See [Protocol](docs/protocol.md). No network listener or remote credential is
 created. The Slack library adapter is offline verified using fake events/API and the
 actual official SDK with networking blocked. It is not connected to a workspace
 and has made no live posts. See [Adapter contracts](docs/adapters.md). Its durable
-thread mapping, sender grants and run-bound replies remain outside Core. Real
-fixed-command execution (P3) and container packaging are subsequent milestones. This is an early development snapshot, not a released production hub.
+thread mapping, sender grants and run-bound replies remain outside Core. The POSIX fixed-command Executor is locally verified with a real JSON subprocess
+and a full CLI create → worker → result round-trip. Explicit trusted operator
+configuration is required; it is never enabled by task text. Run
+`python examples/command_roundtrip.py` for an effect-free real-process demo.
+See [the command contract](docs/adapters.md#generic-fixed-command-executor-p3).
+Container packaging is subsequent preparation. This is an early development snapshot, not a released production hub.
 
 ## Design and boundaries
 

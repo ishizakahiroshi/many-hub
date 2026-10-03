@@ -165,3 +165,53 @@ to create those tokens, add scopes, install an app, or post in a workspace.
 - [chat.postMessage threading and formatting](https://docs.slack.dev/reference/methods/chat.postMessage/)
 
 Read 2026-10-03. These are interface references, not live workspace test evidence.
+
+## Generic fixed-command Executor P3
+
+`manyhub.executors.command.CommandExecutor` is an operator-composed, POSIX-only
+adapter. The local real-process example is `python examples/command_roundtrip.py`.
+It executes the project's effect-free `structured_worker.py` using a fixed
+absolute Python interpreter, fixed `-I` argv, a dedicated temporary working
+directory, JSON stdin and a structured stdout result. The complete Service →
+real subprocess → Service → local delivery round-trip is tested.
+
+An administrator supplies `CommandSpec`: executor ID, absolute executable,
+explicit executable allowlist, fixed argument tuple, fixed workspace, timeout
+and output cap. Task data cannot set these. No shell or inherited Hub environment
+is used; stdout plus stderr is bounded, raw stderr is discarded, and process
+setup failure/timeout/invalid output yields a conservative uncertain result.
+No universal external-effect idempotency is promised and uncertainty is never
+retried automatically. Nonzero exit reports process failure, not effect rollback.
+
+The executable, interpreter scripts, imported libraries, workspace and writable
+parent paths must all be trusted and protected from untrusted modification.
+The executable allowlist validates a path; it is not a content-signing system.
+POSIX process-group cleanup is **not a complete process-tree sandbox**. Workers
+must not daemonize, call `setsid`, escape their process group, or launch persistent
+background work. A hostile program can escape this contract. Use OS/container
+isolation and a separate security review before more powerful executors.
+
+Capabilities: start_run and structured_result only. No cancel confirmation,
+resume_owned_run, interactive approval, artifact publishing, bot login or
+external AI account is advertised. The adapter is not automatically enabled by
+CLI/MCP/Compose. Windows is disabled pending equivalent process-tree lifecycle
+support; Linux is tested locally and other POSIX platforms require CI evidence.
+
+MCP mutation annotations are conservative for embedding with effectful executors:
+create/reply/cancel are non-read-only, potentially destructive/open-world. The
+hints do not replace grants or executor-owned approval.
+
+To explicitly enable a trusted command for a local CLI/MCP/worker process, pass
+`--command-config /absolute/path/command.json` each time. Without that flag only
+Mock is registered and `executor:use:<configured-id>` is absent. The file must
+contain `executor_id`, absolute `executable`, a fixed `arguments` array, absolute
+`workspace`, and an `allowed_executables` array. Optional `timeout_seconds` and
+`max_output_bytes` can only lower the bounded runtime envelope. There is no
+environment override, shell mode or task-supplied configuration path. Treat this
+operator file as executable policy and protect it accordingly.
+
+The test `test_cli_to_real_executor_to_cli_full_roundtrip` launches separate CLI
+processes for create, worker and get, uses the trusted project JSON worker and
+checks the structured result. It also proves that creation is denied without the
+explicit command configuration/grant. This tests local real execution, not an
+external AI account or production service.

@@ -18,7 +18,9 @@ credential provisioning, OAuth, token storage or an Internet-facing listener.
 
 Inputs, references, replies and outputs remain data. Mock echoes data and has no
 external effects. `approved: true` inside input/reply is inert; it never authorizes
-an operation. Unknown capabilities default false. No real executor is enabled.
+an operation. Unknown capabilities default false. No real executor is enabled by default. Explicit local --command-config can
+register an operator-trusted fixed-command Executor; never select that file from
+untrusted task data. See adapters.md for its POSIX process-group limitations.
 Task results are delivery records, never new incoming tasks; loop-origin and hop
 checks provide additional defenses.
 
